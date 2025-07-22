@@ -13,6 +13,11 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = '__all__'
+        
+class ImageUploadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = ['project', 'title', 'image_file']
 
 class ProjectSerializer(serializers.ModelSerializer):
     image = ImageSerializer(read_only=True)
