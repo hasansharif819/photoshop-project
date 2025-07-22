@@ -1,4 +1,3 @@
-
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -20,6 +19,15 @@ class ProjectViewSet(viewsets.ModelViewSet):
 class ImageViewSet(viewsets.ModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
+
+    @action(detail=True, methods=['delete'], url_path='delete-with-layers')
+    def delete_with_layers(self, request, pk=None):
+        try:
+            image = self.get_object()
+            image.delete()
+            return Response({"detail": "Image and associated layers deleted."}, status=status.HTTP_204_NO_CONTENT)
+        except Image.DoesNotExist:
+            return Response({"detail": "Image not found."}, status=status.HTTP_404_NOT_FOUND)
 
 class LayerViewSet(viewsets.ModelViewSet):
     queryset = Layer.objects.all()
