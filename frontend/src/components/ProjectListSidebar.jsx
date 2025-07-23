@@ -9,7 +9,7 @@ const ProjectListSidebar = ({ projects }) => {
     : null;
 
   return (
-    <div style={{ width: 250, padding: 10, borderRight: "1px solid #ccc" }}>
+    <div style={{ width: 250, padding: 10, borderLeft: "1px solid #ccc" }}>
       <h3>Projects</h3>
       <button onClick={() => navigate("/upload")} style={{ marginBottom: 10 }}>
         Add New Project
