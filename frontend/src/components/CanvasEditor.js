@@ -295,34 +295,55 @@ const CanvasEditor = ({ project }) => {
     }
   };
 
+  // const eraseAtPosition = (position) => {
+  //   const eraseRadius = brushSize;
+  //   setShapes(prevShapes => {
+  //     return prevShapes.filter(shape => {
+  //       if (shape.type === shapeTypes.PATH || shape.type === shapeTypes.LINE) {
+  //         // For paths and lines, check if any point is within erase radius
+  //         if (shape.type === shapeTypes.PATH) {
+  //           const path = new Path2D(shape.data);
+  //           const isHit = isPointInStroke(path, position.x, position.y, eraseRadius);
+  //           return !isHit;
+  //         } else if (shape.type === shapeTypes.LINE) {
+  //           // Simple distance check for lines
+  //           const [x1, y1, x2, y2] = shape.points;
+  //           const distance = distanceToLine(position.x, position.y, x1, y1, x2, y2);
+  //           return distance > eraseRadius;
+  //         }
+  //         return true;
+  //       } else {
+  //         // For other shapes, check if position is within shape bounds plus erase radius
+  //         const shapeNode = stageRef.current.findOne(`#${shape.id}`);
+  //         if (shapeNode) {
+  //           return !shapeNode.intersects(position);
+  //         }
+  //         return true;
+  //       }
+  //     });
+  //   });
+  // };
+
   const eraseAtPosition = (position) => {
     const eraseRadius = brushSize;
+  
     setShapes(prevShapes => {
       return prevShapes.filter(shape => {
-        if (shape.type === shapeTypes.PATH || shape.type === shapeTypes.LINE) {
-          // For paths and lines, check if any point is within erase radius
-          if (shape.type === shapeTypes.PATH) {
-            const path = new Path2D(shape.data);
-            const isHit = isPointInStroke(path, position.x, position.y, eraseRadius);
-            return !isHit;
-          } else if (shape.type === shapeTypes.LINE) {
-            // Simple distance check for lines
-            const [x1, y1, x2, y2] = shape.points;
-            const distance = distanceToLine(position.x, position.y, x1, y1, x2, y2);
-            return distance > eraseRadius;
-          }
-          return true;
-        } else {
-          // For other shapes, check if position is within shape bounds plus erase radius
-          const shapeNode = stageRef.current.findOne(`#${shape.id}`);
-          if (shapeNode) {
-            return !shapeNode.intersects(position);
-          }
-          return true;
-        }
+        const shapeNode = stageRef.current.findOne(`#${shape.id}`);
+        if (!shapeNode) return true;
+  
+        // Create a temporary circle shape to simulate the eraser area
+        const tempCircle = new window.Konva.Circle({
+          x: position.x,
+          y: position.y,
+          radius: eraseRadius,
+        });
+  
+        return !shapeNode.intersects(tempCircle.getClientRect());
       });
     });
   };
+  
 
   const distanceToLine = (x, y, x1, y1, x2, y2) => {
     const A = x - x1;
