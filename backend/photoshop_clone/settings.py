@@ -57,7 +57,7 @@ DATABASES = {
         'NAME': 'photoshop_clone',
         'USER': 'sharif',
         'PASSWORD': 'password',
-        'HOST': 'localhost',
+        'HOST': '192.168.0.224',
         'PORT': '5432',
     }
 }
