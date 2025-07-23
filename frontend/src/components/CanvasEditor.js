@@ -1903,9 +1903,7 @@ const CanvasEditor = ({ project }) => {
   }
 
   return (
-    <div className="canvas-container">
-      <h1 className="canvas-title">Rainbow Visualizer</h1>
-
+    <section className="canvas-editor">
       <div className="tool-sections">
         <div className="tool-section">
           <h3>Tools</h3>
@@ -2041,287 +2039,301 @@ const CanvasEditor = ({ project }) => {
         </div>
       </div>
 
-      {mode === shapeTypes.POLYGON && tempPoints.length > 0 && (
-        <div className="polygon-controls">
-          <button
-            className="action-btn"
-            onClick={completePolygon}
-            disabled={tempPoints.length < 6}
-          >
-            Complete Polygon
-          </button>
-          <button className="action-btn danger" onClick={cancelPolygon}>
-            Cancel
-          </button>
-        </div>
-      )}
+      <div className="canvas-container">
+        <h1 className="canvas-title">Rainbow Visualizer</h1>
 
-      <Stage
-        width={800}
-        height={600}
-        ref={stageRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        className="canvas-stage"
-      >
-        <Layer>
-          {bgImage && <KonvaImage image={bgImage} width={800} height={600} />}
-        </Layer>
+        {mode === shapeTypes.POLYGON && tempPoints.length > 0 && (
+          <div className="polygon-controls">
+            <button
+              className="action-btn"
+              onClick={completePolygon}
+              disabled={tempPoints.length < 6}
+            >
+              Complete Polygon
+            </button>
+            <button className="action-btn danger" onClick={cancelPolygon}>
+              Cancel
+            </button>
+          </div>
+        )}
 
-        <Layer>
-          {sortedShapes.map((shape) => renderShape(shape))}
+        <Stage
+          width={800}
+          height={600}
+          ref={stageRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          className="canvas-stage"
+        >
+          <Layer>
+            {bgImage && <KonvaImage image={bgImage} width={800} height={600} />}
+          </Layer>
 
-          {mode === shapeTypes.POLYGON && tempPoints.length > 0 && (
-            <Line
-              points={tempPoints}
-              stroke={color}
-              strokeWidth={2}
-              closed={false}
+          <Layer>
+            {sortedShapes.map((shape) => renderShape(shape))}
+
+            {mode === shapeTypes.POLYGON && tempPoints.length > 0 && (
+              <Line
+                points={tempPoints}
+                stroke={color}
+                strokeWidth={2}
+                closed={false}
+              />
+            )}
+
+            {mode === shapeTypes.BRUSH && isDrawing && (
+              <Path
+                data={brushPath}
+                stroke={color}
+                strokeWidth={brushSize}
+                lineCap="round"
+                lineJoin="round"
+              />
+            )}
+
+            {mode === shapeTypes.ERASER && isErasing && (
+              <Path
+                data={eraserPath}
+                stroke="#ffffff"
+                strokeWidth={brushSize * 2}
+                lineCap="round"
+                lineJoin="round"
+                opacity={0.5}
+              />
+            )}
+          </Layer>
+
+          <Layer>
+            <Transformer
+              ref={transformerRef}
+              rotateEnabled={true}
+              enabledAnchors={[
+                "top-left",
+                "top-right",
+                "bottom-left",
+                "bottom-right",
+              ]}
+              borderStroke="#0099ff"
+              borderStrokeWidth={1}
+              anchorStroke="#0099ff"
+              anchorSize={8}
+              anchorCornerRadius={10}
+              keepRatio={false}
+              boundBoxFunc={(oldBox, newBox) => {
+                if (newBox.width < 5 || newBox.height < 5) {
+                  return oldBox;
+                }
+                return newBox;
+              }}
             />
-          )}
+          </Layer>
+        </Stage>
 
-          {mode === shapeTypes.BRUSH && isDrawing && (
-            <Path
-              data={brushPath}
-              stroke={color}
-              strokeWidth={brushSize}
-              lineCap="round"
-              lineJoin="round"
-            />
-          )}
+        <style jsx>{`
+          .canvas-editor {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 50px;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+          }
 
-          {mode === shapeTypes.ERASER && isErasing && (
-            <Path
-              data={eraserPath}
-              stroke="#ffffff"
-              strokeWidth={brushSize * 2}
-              lineCap="round"
-              lineJoin="round"
-              opacity={0.5}
-            />
-          )}
-        </Layer>
+          .canvas-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background-color: #f5f5f5;
+          }
 
-        <Layer>
-          <Transformer
-            ref={transformerRef}
-            rotateEnabled={true}
-            enabledAnchors={[
-              "top-left",
-              "top-right",
-              "bottom-left",
-              "bottom-right",
-            ]}
-            borderStroke="#0099ff"
-            borderStrokeWidth={1}
-            anchorStroke="#0099ff"
-            anchorSize={8}
-            anchorCornerRadius={10}
-            keepRatio={false}
-            boundBoxFunc={(oldBox, newBox) => {
-              if (newBox.width < 5 || newBox.height < 5) {
-                return oldBox;
-              }
-              return newBox;
-            }}
-          />
-        </Layer>
-      </Stage>
+          .canvas-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+          }
 
-      <style jsx>{`
-        .canvas-container {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 20px;
-          background-color: #f5f5f5;
-        }
+          .tool-sections {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 15px;
+            background: rgb(219, 123, 123);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          }
 
-        .canvas-title {
-          text-align: center;
-          color: #333;
-          margin-bottom: 10px;
-        }
+          .tool-sections > div {
+            flex: 1;
+          }
 
-        .tool-sections {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 20px;
-          padding: 15px;
-          background: #fff;
-          border-radius: 8px;
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
+          .clear-canvas,
+          .right-actions,
+          .color-picker-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+          }
 
-        .tool-sections > div {
-          flex: 1;
-        }
+          .tool-section {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 6px;
+          }
 
-        .clear-canvas,
-        .right-actions,
-        .color-picker-container {
-          display: flex;
-          justify-content: center;
-          margin-top: 10px;
-        }
+          .tool-section h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #333;
+          }
 
-        .tool-section {
-          flex: 1;
-          min-width: 150px;
-          padding: 10px;
-          background: #f0f0f0;
-          border-radius: 6px;
-        }
+          .tool-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+          }
 
-        .tool-section h3 {
-          margin-top: 0;
-          margin-bottom: 10px;
-          font-size: 14px;
-          color: #333;
-        }
+          .tool-btn {
+            padding: 8px 12px;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            font-size: 12px;
+          }
 
-        .tool-buttons {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
-        }
+          .tool-btn:hover {
+            background: #e9e9e9;
+          }
 
-        .tool-btn {
-          padding: 8px 12px;
-          background: #fff;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          cursor: pointer;
-          white-space: nowrap;
-          transition: all 0.2s;
-          font-size: 12px;
-        }
+          .tool-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+          }
 
-        .tool-btn:hover {
-          background: #e9e9e9;
-        }
+          .color-picker-container {
+            margin-bottom: 10px;
+          }
 
-        .tool-btn.active {
-          background: #007bff;
-          color: white;
-          border-color: #007bff;
-        }
+          .color-picker {
+            width: 100%;
+            height: 100px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+          }
 
-        .color-picker-container {
-          margin-bottom: 10px;
-        }
+          .palette-option {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+          }
 
-        .color-picker {
-          width: 100%;
-          height: 100px;
-          border-radius: 6px;
-          margin-bottom: 10px;
-        }
+          .palette-option input {
+            margin-right: 5px;
+          }
 
-        .palette-option {
-          display: flex;
-          align-items: center;
-          font-size: 12px;
-        }
+          .brush-size-control {
+            font-size: 12px;
+          }
 
-        .palette-option input {
-          margin-right: 5px;
-        }
+          .brush-size-control label {
+            display: block;
+            margin-bottom: 5px;
+          }
 
-        .brush-size-control {
-          font-size: 12px;
-        }
+          .brush-size-control input {
+            width: 100%;
+          }
 
-        .brush-size-control label {
-          display: block;
-          margin-bottom: 5px;
-        }
+          .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          }
 
-        .brush-size-control input {
-          width: 100%;
-        }
+          .left-actions,
+          .right-actions {
+            display: flex;
+            gap: 8px;
+          }
 
-        .action-buttons {
-          display: flex;
-          justify-content: space-between;
-          gap: 10px;
-          padding: 15px;
-          background: #fff;
-          border-radius: 8px;
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
+          .action-btn {
+            padding: 8px 12px;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            font-size: 12px;
+          }
 
-        .left-actions,
-        .right-actions {
-          display: flex;
-          gap: 8px;
-        }
+          .action-btn:hover {
+            background: #e9e9e9;
+          }
 
-        .action-btn {
-          padding: 8px 12px;
-          background: #fff;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          cursor: pointer;
-          white-space: nowrap;
-          transition: all 0.2s;
-          font-size: 12px;
-        }
+          .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
 
-        .action-btn:hover {
-          background: #e9e9e9;
-        }
+          .action-btn.primary {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+          }
 
-        .action-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
+          .action-btn.primary:hover {
+            background: #0069d9;
+          }
 
-        .action-btn.primary {
-          background: #007bff;
-          color: white;
-          border-color: #007bff;
-        }
+          .action-btn.danger {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+          }
 
-        .action-btn.primary:hover {
-          background: #0069d9;
-        }
+          .action-btn.danger:hover {
+            background: #c82333;
+          }
 
-        .action-btn.danger {
-          background: #dc3545;
-          color: white;
-          border-color: #dc3545;
-        }
+          .polygon-controls {
+            display: flex;
+            gap: 8px;
+            padding: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            margin-top: 8px;
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+          }
 
-        .action-btn.danger:hover {
-          background: #c82333;
-        }
-
-        .polygon-controls {
-          display: flex;
-          gap: 8px;
-          padding: 8px;
-          background: #f0f0f0;
-          border-radius: 4px;
-          margin-top: 8px;
-          position: absolute;
-          top: 60px;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 100;
-        }
-
-        .canvas-stage {
-          border: 1px solid #ccc;
-          border-radius: 8px;
-          background: #fff;
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-      `}</style>
-    </div>
+          .canvas-stage {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+          }
+        `}</style>
+      </div>
+    </section>
   );
 };
 
