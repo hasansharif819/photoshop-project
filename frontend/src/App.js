@@ -39,30 +39,47 @@ const AppLayout = () => {
   }, []);
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      <div style={{ flex: 1, padding: 20 }}>
-        {/* <h2>Photoshop Clone</h2> */}
-        <Routes>
-          <Route
-            path="/"
-            element={<p>Select a project or create a new one.</p>}
-          />
-          <Route path="/projects/:id" element={<ProjectEditorPage />} />
-          <Route
-            path="/upload"
-            element={
-              <UploadProjectPage
-                onUploadSuccess={async (project, navigate) => {
-                  await fetchProjects();
-                  navigate(`/projects/${project.id}`);
-                }}
-              />
-            }
-          />
-        </Routes>
+    <section>
+      <h1 className="canvas-title">
+        <span style={{ color: "red" }}>R</span>
+        <span style={{ color: "orange" }}>a</span>
+        <span style={{ color: "yellow" }}>i</span>
+        <span style={{ color: "green" }}>n</span>
+        <span style={{ color: "blue" }}>b</span>
+        <span style={{ color: "indigo" }}>o</span>
+        <span style={{ color: "violet" }}>w</span>
+        <span>&nbsp;</span>
+        <span style={{ color: "crimson" }}>V</span>
+        <span style={{ color: "deeppink" }}>i</span>
+        <span style={{ color: "coral" }}>s</span>
+        <span style={{ color: "gold" }}>u</span>
+        <span style={{ color: "limegreen" }}>a</span>
+        <span style={{ color: "dodgerblue" }}>l</span>
+        <span style={{ color: "purple" }}>i</span>
+        <span style={{ color: "hotpink" }}>z</span>
+        <span style={{ color: "teal" }}>e</span>
+        <span style={{ color: "slategray" }}>r</span>
+      </h1>
+      <div style={{ display: "flex", height: "100vh" }}>
+        <div style={{ flex: 1, padding: 0 }}>
+          <Routes>
+            <Route path="/projects/:id" element={<ProjectEditorPage />} />
+            <Route
+              path="/upload"
+              element={
+                <UploadProjectPage
+                  onUploadSuccess={async (project, navigate) => {
+                    await fetchProjects();
+                    navigate(`/projects/${project.id}`);
+                  }}
+                />
+              }
+            />
+          </Routes>
+        </div>
+        <ProjectListSidebar projects={projects} />
       </div>
-      <ProjectListSidebar projects={projects} />
-    </div>
+    </section>
   );
 };
 
