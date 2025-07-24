@@ -2012,6 +2012,11 @@ const CanvasEditor = ({ project }) => {
               Redo
             </button>
           </div>
+          <div className="clear-canvas">
+            <button className="action-btn" onClick={clearCanvas}>
+              Clear Canvas
+            </button>
+          </div>
           <div className="right-actions">
             {selectedId && (
               <button
@@ -2031,11 +2036,7 @@ const CanvasEditor = ({ project }) => {
               />
             )}
           </div>
-          <div className="clear-canvas">
-            <button className="action-btn" onClick={clearCanvas}>
-              Clear Canvas
-            </button>
-          </div>
+          
         </div>
       </div>
 
@@ -2131,7 +2132,13 @@ const CanvasEditor = ({ project }) => {
         </Stage>
 
         <style jsx>{`
+
+          #root{
+            background-color: rgb(191, 226, 255);
+            }
+          
           .canvas-editor {
+            height: 80vh;
             display: flex;
             flex-direction: row;
             justify-content: center;
