@@ -1952,6 +1952,59 @@ const CanvasEditor = ({ project }) => {
             <h3>Shapes</h3>
             <div className="tool-buttons">
               <button
+                style={
+                  mode === shapeTypes.POLYGON
+                    ? {
+                        padding: "8px 12px",
+                        background: "#007bff",
+                        color: "white",
+                        border: "1px solid #007bff",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                      }
+                    : {
+                        padding: "8px 12px",
+                        background: "#fff",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                      }
+                }
+                onClick={() => {
+                  setMode(shapeTypes.POLYGON);
+                  setTempPoints([]);
+                }}
+              >
+                Polygon
+              </button>
+              <button
+                style={
+                  mode === shapeTypes.OVAL
+                    ? {
+                        padding: "8px 12px",
+                        background: "#007bff",
+                        color: "white",
+                        border: "1px solid #007bff",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                      }
+                    : {
+                        padding: "8px 12px",
+                        background: "#fff",
+                        border: "1px solid #ccc",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                      }
+                }
+                onClick={() => setMode(shapeTypes.OVAL)}
+              >
+                Oval
+              </button>
+              <button
                 className={`tool-btn ${
                   mode === shapeTypes.RECTANGLE ? "active" : ""
                 }`}
@@ -1999,7 +2052,7 @@ const CanvasEditor = ({ project }) => {
 
           <div className="tool-section">
             <h3>Options</h3>
-            <div className="left-actions">
+            <div className="action-buttons-undo-redo">
               <button
                 className="action-btn"
                 onClick={undo}
@@ -2014,6 +2067,22 @@ const CanvasEditor = ({ project }) => {
               >
                 Redo
               </button>
+            </div>
+            <div className="left-actions">
+              {mode === shapeTypes.POLYGON && tempPoints.length > 0 && (
+                <div className="polygon-controls">
+                  <button
+                    className="action-btn"
+                    onClick={completePolygon}
+                    disabled={tempPoints.length < 6}
+                  >
+                    Complete
+                  </button>
+                  <button className="action-btn danger" onClick={cancelPolygon}>
+                    X
+                  </button>
+                </div>
+              )}
             </div>
             <div className="clear-canvas">
               <button className="action-btn" onClick={clearCanvas}>
@@ -2043,21 +2112,6 @@ const CanvasEditor = ({ project }) => {
         </div>
 
         <div className="canvas-container">
-          {mode === shapeTypes.POLYGON && tempPoints.length > 0 && (
-            <div className="polygon-controls">
-              <button
-                className="action-btn"
-                onClick={completePolygon}
-                disabled={tempPoints.length < 6}
-              >
-                Complete Polygon
-              </button>
-              <button className="action-btn danger" onClick={cancelPolygon}>
-                Cancel
-              </button>
-            </div>
-          )}
-
           <Stage
             width={800}
             height={600}
@@ -2284,6 +2338,12 @@ const CanvasEditor = ({ project }) => {
               gap: 8px;
             }
 
+            .action-buttons-undo-redo {
+              display: flex;
+              gap: 10px;
+              justify-content: center;
+            }
+
             .action-btn {
               padding: 8px 12px;
               background: #fff;
@@ -2331,11 +2391,11 @@ const CanvasEditor = ({ project }) => {
               background: #f0f0f0;
               border-radius: 4px;
               margin-top: 8px;
-              position: absolute;
-              top: 60px;
-              left: 50%;
-              transform: translateX(-50%);
-              z-index: 100;
+              // position: absolute;
+              // top: 60px;
+              // left: 50%;
+              // transform: translateX(-50%);
+              // z-index: 100;
             }
 
             .canvas-stage {
