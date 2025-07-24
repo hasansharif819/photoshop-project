@@ -39,7 +39,12 @@ const AppLayout = () => {
   }, []);
 
   return (
-    <section>
+    <section
+      style={{
+        backgroundColor: "#bfe2ff",
+        paddingBottom: "20px",
+      }}
+    >
       <h1 className="canvas-title">
         <span style={{ color: "red" }}>R</span>
         <span style={{ color: "orange" }}>a</span>

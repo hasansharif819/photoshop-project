@@ -1254,6 +1254,81 @@ const CanvasEditor = ({ project }) => {
   const [isErasing, setIsErasing] = useState(false);
   const [hasImage, setHasImage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [activePalette, setActivePalette] = useState(0);
+
+  const COLOR_PALETTES = [
+    [
+      "#FF0000",
+      "#FF7F00",
+      "#FFFF00",
+      "#00FF00",
+      "#0000FF",
+      "#4B0082",
+      "#9400D3",
+      "#FFFFFF",
+      "#000000",
+      "#808080",
+      "#C0C0C0",
+      "#FF69B4",
+    ],
+    [
+      "#FFD1DC",
+      "#FFECB8",
+      "#E2F0CB",
+      "#B5EAD7",
+      "#C7CEEA",
+      "#E2D1F9",
+      "#FFFFFF",
+      "#F8F8F8",
+      "#D3D3D3",
+      "#A9A9A9",
+      "#696969",
+      "#FF9AA2",
+    ],
+    [
+      "#3E2723",
+      "#5D4037",
+      "#795548",
+      "#8D6E63",
+      "#A1887F",
+      "#BCAAA4",
+      "#D7CCC8",
+      "#EFEBE9",
+      "#4E342E",
+      "#6D4C41",
+      "#8D6E63",
+      "#A1887F",
+    ],
+  ];
+
+  const ColorMatrix = ({ colors, onColorSelect, cellSize = 30 }) => {
+    return (
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "4px",
+          margin: "10px 0",
+        }}
+      >
+        {colors.map((color, index) => (
+          <div
+            key={index}
+            onClick={() => onColorSelect(color)}
+            style={{
+              width: cellSize,
+              height: cellSize,
+              backgroundColor: color,
+              border: "1px solid #ddd",
+              cursor: "pointer",
+              borderRadius: "3px",
+            }}
+            title={color}
+          />
+        ))}
+      </div>
+    );
+  };
 
   const shapeTypes = {
     SELECT: "select",
@@ -1907,7 +1982,8 @@ const CanvasEditor = ({ project }) => {
       <section className="canvas-editor">
         <div className="tool-sections">
           <div className="tool-section">
-            <h3>Tools</h3>
+            <h3 style={{ fontSize: "16px" }}>Tools</h3>
+            <hr />
             <div className="tool-buttons">
               <button
                 className={`tool-btn ${
@@ -1949,7 +2025,8 @@ const CanvasEditor = ({ project }) => {
           </div>
 
           <div className="tool-section">
-            <h3>Shapes</h3>
+            <h3 style={{ fontSize: "16px" }}>Shapes</h3>
+            <hr />
             <div className="tool-buttons">
               <button
                 style={
@@ -2040,18 +2117,53 @@ const CanvasEditor = ({ project }) => {
           </div>
 
           <div className="tool-section">
-            <h3>Color</h3>
-            <div className="color-picker-container">
-              <HexColorPicker
-                color={color}
-                onChange={setColor}
-                className="color-picker"
+            <h3 style={{ fontSize: "16px" }}>Color</h3>
+            <hr />
+            <div className="tool-option">
+              <label>Color Picker:</label>
+              <br />
+              <input
+                style={{ width: "100%", height: "30px", marginBottom: "10px" }}
+                type="color"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                onFocus={(e) => window.innerWidth < 768 && e.target.blur()}
               />
             </div>
+
+            <div className="palette-selector">
+              <button
+                onClick={() =>
+                  setActivePalette(
+                    (prev) =>
+                      (prev - 1 + COLOR_PALETTES.length) % COLOR_PALETTES.length
+                  )
+                }
+                disabled={COLOR_PALETTES.length <= 1}
+              >
+                ◀
+              </button>
+              <span>
+                Palette {activePalette + 1}/{COLOR_PALETTES.length}
+              </span>
+              <button
+                onClick={() =>
+                  setActivePalette((prev) => (prev + 1) % COLOR_PALETTES.length)
+                }
+                disabled={COLOR_PALETTES.length <= 1}
+              >
+                ▶
+              </button>
+            </div>
+            <ColorMatrix
+              colors={COLOR_PALETTES[activePalette]}
+              onColorSelect={setColor}
+            />
           </div>
 
           <div className="tool-section">
-            <h3>Options</h3>
+            <h3 style={{ fontSize: "16px" }}>Options</h3>
+            <hr />
             <div className="action-buttons-undo-redo">
               <button
                 className="action-btn"
@@ -2210,6 +2322,9 @@ const CanvasEditor = ({ project }) => {
               flex-direction: column;
               gap: 16px;
               background-color: #f5f5f5;
+              // min-height: 98vh;
+              // min-width: 800px;
+              // max-width: 100%;
             }
 
             .canvas-title {
@@ -2220,7 +2335,7 @@ const CanvasEditor = ({ project }) => {
               padding-bottom: 20px;
               padding-top: 50px;
               border-bottom: 2px solid #ccc;
-              margin-bottom: 0;
+              margin: 0;
             }
 
             .tool-sections {
@@ -2229,6 +2344,7 @@ const CanvasEditor = ({ project }) => {
               flex-wrap: wrap;
               gap: 20px;
               padding: 15px;
+              margin-bottom: 30px;
               background: rgb(219, 123, 123);
               border-radius: 8px;
               box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -2236,6 +2352,11 @@ const CanvasEditor = ({ project }) => {
 
             .tool-sections > div {
               flex: 1;
+            }
+
+            .tool-option,
+            .action-buttons-undo-redo {
+              padding-top: 20px;
             }
 
             .clear-canvas,
@@ -2250,7 +2371,7 @@ const CanvasEditor = ({ project }) => {
               flex: 1;
               min-width: 150px;
               padding: 10px;
-              background: #f0f0f0;
+              // background: #f0f0f0;
               border-radius: 6px;
             }
 
@@ -2265,6 +2386,7 @@ const CanvasEditor = ({ project }) => {
               display: flex;
               flex-wrap: wrap;
               gap: 8px;
+              padding-top: 20px;
             }
 
             .tool-btn {
@@ -2297,6 +2419,13 @@ const CanvasEditor = ({ project }) => {
               height: 100px;
               border-radius: 6px;
               margin-bottom: 10px;
+            }
+
+            .palette-selector {
+              display: flex;
+              align-items: center;
+              justify-content: space-around;
+              font-size: 12px;
             }
 
             .palette-option {
@@ -2391,11 +2520,6 @@ const CanvasEditor = ({ project }) => {
               background: #f0f0f0;
               border-radius: 4px;
               margin-top: 8px;
-              // position: absolute;
-              // top: 60px;
-              // left: 50%;
-              // transform: translateX(-50%);
-              // z-index: 100;
             }
 
             .canvas-stage {
@@ -2403,6 +2527,9 @@ const CanvasEditor = ({ project }) => {
               border-radius: 8px;
               background: #fff;
               box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+              // min-height: 98vh;
+              // min-width: 800px;
+              // max-width: 100%;
             }
           `}</style>
         </div>
