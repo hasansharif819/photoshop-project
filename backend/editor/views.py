@@ -27,6 +27,15 @@ class ProjectViewSet(viewsets.ModelViewSet):
         except Project.DoesNotExist:
             return Response({"detail": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
         
+    @action(detail=True, methods=['delete'], url_path='delete-with-resources')
+    def delete_with_resources(self, request, pk=None):
+        try:
+            project = self.get_object()
+            project.delete()  
+            return Response({"detail": "Project, images, and layers deleted."}, status=status.HTTP_204_NO_CONTENT)
+        except Project.DoesNotExist:
+            return Response({"detail": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+    
 
 class ImageViewSet(viewsets.ModelViewSet):
     queryset = Image.objects.all()
@@ -64,6 +73,15 @@ class ImageViewSet(viewsets.ModelViewSet):
         except Image.DoesNotExist:
             return Response({"detail": "Image not found."}, status=status.HTTP_404_NOT_FOUND)
  
+    @action(detail=True, methods=['delete'], url_path='delete-with-layers')
+    def delete_with_layers(self, request, pk=None):
+        try:
+            image = self.get_object()
+            image.delete()
+            return Response({"detail": "Image and associated layers deleted."}, status=status.HTTP_204_NO_CONTENT)
+        except Image.DoesNotExist:
+            return Response({"detail": "Image not found."}, status=status.HTTP_404_NOT_FOUND)
+
 
 class LayerViewSet(viewsets.ModelViewSet):
     queryset = Layer.objects.all()
