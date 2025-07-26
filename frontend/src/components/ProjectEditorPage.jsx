@@ -10,7 +10,7 @@ const ProjectEditorPage = () => {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const res = await axios.get(`/projects/${id}/`);
+        const res = await axios.get(`/images/${id}/`);
         setProject(res.data);
       } catch (err) {
         console.error("Failed to fetch project", err);

@@ -1346,8 +1346,11 @@ const CanvasEditor = ({ project }) => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const res = await axios.get(`/projects/${project.id}/`);
-      const imageData = res.data.image;
+      const res = await axios.get(`/images/${project.id}/`);
+      const imageData = res?.data;
+
+      console.log("res === >", res);
+      console.log("imageData === >", imageData);
 
       if (imageData && imageData.image_file) {
         setImageURL(imageData.image_file);
@@ -1801,10 +1804,13 @@ const CanvasEditor = ({ project }) => {
   };
 
   const saveNewLayers = async () => {
-    if (!project?.image?.id) return;
+    // if (!project?.image?.id) return;
 
-    const imageId = project.image.id;
+    const imageId = project.id;
     const newLayers = shapes.filter((s) => s.isNew);
+
+    console.log("imageId === >", imageId);
+    console.log("newLayers === >", newLayers);
 
     for (let i = 0; i < newLayers.length; i++) {
       const shape = newLayers[i];
