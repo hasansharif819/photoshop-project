@@ -126,6 +126,21 @@ const UploadImageModal = ({ projectId, isOpen, onClose, onSuccess }) => {
   const [error, setError] = useState(null);
   const [title, setTitle] = useState("");
 
+  const navigate = useNavigate();
+  const [uploadModal, setUploadModal] = useState({
+    isOpen: false,
+    projectId: null,
+  });
+
+  // Open upload image modal
+  const openUploadModal = (projectId) => {
+    console.log("projectId === >", projectId);
+    setUploadModal({
+      isOpen: true,
+      projectId,
+    });
+  };
+
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
   };
@@ -155,8 +170,8 @@ const UploadImageModal = ({ projectId, isOpen, onClose, onSuccess }) => {
         }
       );
 
-      onSuccess(response.data);
       onClose();
+      navigate(`/projects/${response?.data?.id}`);
     } catch (err) {
       console.error("Upload failed:", err);
       setError(err.response?.data?.message || "Failed to upload image");

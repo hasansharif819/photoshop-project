@@ -1349,9 +1349,6 @@ const CanvasEditor = ({ project }) => {
       const res = await axios.get(`/images/${project.id}/`);
       const imageData = res?.data;
 
-      console.log("res === >", res);
-      console.log("imageData === >", imageData);
-
       if (imageData && imageData.image_file) {
         setImageURL(imageData.image_file);
         setImageID(imageData.id);
