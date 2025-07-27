@@ -780,6 +780,7 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                                 navigate(
                                   `/projects/${image.id}?layer=${layer.id}`
                                 );
+                                window.location.reload();
                               }}
                             >
                               <div

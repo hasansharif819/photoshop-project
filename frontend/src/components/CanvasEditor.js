@@ -1357,6 +1357,78 @@ const CanvasEditor = ({ project }) => {
     setSelectedId(id);
   }, []);
 
+  // Handle URL changes -> update state
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const layer = query.get("layer");
+
+    if (layer !== layerId && !isUrlUpdate) {
+      setLayerId(layer);
+
+      // If we have shapes, select the layer immediately
+      if (layer && shapes.length > 0) {
+        const layerToSelect = shapes.find(
+          (s) => s.id.toString() === layer || s.id === Number(layer)
+        );
+        if (layerToSelect) {
+          handleSelect(layerToSelect.id);
+
+          // Center the view on the selected shape
+          const stage = stageRef.current;
+          if (stage) {
+            const shapeNode = stage.findOne(`#${layerToSelect.id}`);
+            if (shapeNode) {
+              stage.position({
+                x: stage.width() / 2 - shapeNode.x(),
+                y: stage.height() / 2 - shapeNode.y(),
+              });
+              stage.batchDraw();
+            }
+          }
+        }
+      }
+    }
+  }, [location.search, shapes.length]); // Only watch these dependencies
+
+  // Handle state changes -> update URL
+  useEffect(() => {
+    if (isUrlUpdate) {
+      setIsUrlUpdate(false);
+      return;
+    }
+
+    const query = new URLSearchParams(location.search);
+    if (selectedId) {
+      query.set("layer", selectedId.toString());
+    } else {
+      query.delete("layer");
+    }
+
+    setIsUrlUpdate(true);
+    window.history.replaceState({}, "", `${location.pathname}?${query}`);
+  }, [selectedId, location.pathname]);
+
+  // Transformer effect
+  useEffect(() => {
+    const stage = stageRef.current;
+    const transformer = transformerRef.current;
+
+    if (!transformer || !stage) return;
+
+    if (!selectedId) {
+      transformer.nodes([]);
+      return;
+    }
+
+    const selectedNode = stage.findOne(`#${selectedId}`);
+    if (selectedNode) {
+      transformer.nodes([selectedNode]);
+      transformer.getLayer()?.batchDraw();
+    } else {
+      transformer.nodes([]);
+    }
+  }, [selectedId, shapes]);
+
   // const handleSelect = (id) => {
   //   // Bring the selected shape to front
   //   setShapes((prevShapes) => {
