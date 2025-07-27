@@ -758,6 +758,7 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                               style={{
                                 display: "flex",
                                 alignItems: "center",
+                                cursor: "pointer",
                                 justifyContent: "space-between",
                                 backgroundColor: "#F9FAFB",
                                 padding: "4px 8px 4px 16px",
@@ -774,6 +775,12 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                                 (e.currentTarget.style.backgroundColor =
                                   "#F9FAFB")
                               }
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(
+                                  `/projects/${image.id}?layer=${layer.id}`
+                                );
+                              }}
                             >
                               <div
                                 style={{
@@ -788,7 +795,11 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                                     fontSize: "10px",
                                   }}
                                 />
-                                <span style={{ color: "#4B5563" }}>
+                                <span
+                                  style={{
+                                    color: "#4B5563",
+                                  }}
+                                >
                                   {layer?.shape_type}
                                 </span>
                               </div>

@@ -1229,8 +1229,8 @@ import {
 } from "react-konva";
 import useImage from "use-image";
 import axios from "../api";
-import { HexColorPicker } from "react-colorful";
 import UploadImage from "./UploadImage";
+import { useLocation } from "react-router-dom";
 
 const CanvasEditor = ({ project }) => {
   const stageRef = useRef(null);
@@ -1255,6 +1255,17 @@ const CanvasEditor = ({ project }) => {
   const [hasImage, setHasImage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activePalette, setActivePalette] = useState(0);
+
+  const location = useLocation();
+  const [layerId, setLayerId] = useState(null);
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const layer = query.get("layer");
+    setLayerId(layer);
+  }, [location.search]);
+
+  // console.log("Layer ID from URL:", layerId);
 
   const COLOR_PALETTES = [
     [
