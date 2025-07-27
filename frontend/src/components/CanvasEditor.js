@@ -1215,7 +1215,7 @@
 // _________________________________________________________________
 // _________________________________________________________________
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   Stage,
   Layer,
@@ -1255,17 +1255,138 @@ const CanvasEditor = ({ project }) => {
   const [hasImage, setHasImage] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activePalette, setActivePalette] = useState(0);
+  const [isUrlUpdate, setIsUrlUpdate] = useState(false);
 
   const location = useLocation();
   const [layerId, setLayerId] = useState(null);
 
+  // Handle URL changes and update state
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const layer = query.get("layer");
-    setLayerId(layer);
-  }, [location.search]);
 
-  // console.log("Layer ID from URL:", layerId);
+    // Only update if the URL changed and we're not the source of the change
+    if (layer !== layerId && !isUrlUpdate) {
+      setLayerId(layer);
+
+      // If we have shapes, select the layer immediately
+      if (layer && shapes.length > 0) {
+        selectLayerById(layer);
+      }
+    }
+  }, [location.search, shapes]);
+
+  // Handle state changes and update URL
+  useEffect(() => {
+    if (isUrlUpdate) {
+      setIsUrlUpdate(false);
+      return;
+    }
+
+    const query = new URLSearchParams(location.search);
+
+    if (selectedId) {
+      query.set("layer", selectedId.toString());
+      setIsUrlUpdate(true);
+      window.history.replaceState({}, "", `${location.pathname}?${query}`);
+    } else {
+      query.delete("layer");
+      setIsUrlUpdate(true);
+      window.history.replaceState({}, "", `${location.pathname}?${query}`);
+    }
+  }, [selectedId, location.pathname]);
+
+  // Improved layer selection function
+  const selectLayerById = useCallback(
+    (id) => {
+      const layerToSelect = shapes.find(
+        (shape) => shape.id.toString() === id || shape.id === Number(id)
+      );
+
+      if (layerToSelect) {
+        // Bring the selected shape to front
+        setShapes((prevShapes) => {
+          const maxZIndex = Math.max(...prevShapes.map((s) => s.zIndex || 0));
+          return prevShapes.map((shape) => {
+            if (shape.id === layerToSelect.id) {
+              return { ...shape, zIndex: maxZIndex + 1 };
+            }
+            return shape;
+          });
+        });
+
+        setSelectedId(layerToSelect.id);
+
+        // Center the view on the selected shape
+        const stage = stageRef.current;
+        if (stage) {
+          const shapeNode = stage.findOne(`#${layerToSelect.id}`);
+          if (shapeNode) {
+            stage.position({
+              x: stage.width() / 2 - shapeNode.x(),
+              y: stage.height() / 2 - shapeNode.y(),
+            });
+            stage.batchDraw();
+          }
+        }
+      } else {
+        console.warn(`Layer with ID ${id} not found`);
+        setSelectedId(null);
+      }
+    },
+    [shapes]
+  );
+
+  // Update your handleSelect to not trigger URL updates
+  const handleSelect = useCallback((id) => {
+    if (!id) {
+      setSelectedId(null);
+      return;
+    }
+
+    setShapes((prevShapes) => {
+      const maxZIndex = Math.max(...prevShapes.map((s) => s.zIndex || 0));
+      return prevShapes.map((shape) => {
+        if (shape.id === id) {
+          return { ...shape, zIndex: maxZIndex + 1 };
+        }
+        return shape;
+      });
+    });
+
+    setSelectedId(id);
+  }, []);
+
+  // const handleSelect = (id) => {
+  //   // Bring the selected shape to front
+  //   setShapes((prevShapes) => {
+  //     const maxZIndex = Math.max(...prevShapes.map((s) => s.zIndex || 0));
+  //     return prevShapes.map((shape) => {
+  //       if (shape.id === id) {
+  //         return { ...shape, zIndex: maxZIndex + 1 };
+  //       }
+  //       return shape;
+  //     });
+  //   });
+  //   setSelectedId(id);
+  // };
+
+  useEffect(() => {
+    if (layerId && shapes.length > 0) {
+      // Find the shape with matching layerId
+      const layerToSelect = shapes.find((shape) => {
+        // Compare both string and number versions in case types differ
+        return shape.id.toString() === layerId || shape.id === Number(layerId);
+      });
+
+      if (layerToSelect) {
+        handleSelect(layerToSelect.id);
+      } else {
+        console.warn(`Layer with ID ${layerId} not found`);
+        setSelectedId(null);
+      }
+    }
+  }, [layerId, shapes]);
 
   const COLOR_PALETTES = [
     [
@@ -1817,8 +1938,8 @@ const CanvasEditor = ({ project }) => {
     const imageId = project.id;
     const newLayers = shapes.filter((s) => s.isNew);
 
-    console.log("imageId === >", imageId);
-    console.log("newLayers === >", newLayers);
+    // console.log("imageId === >", imageId);
+    // console.log("newLayers === >", newLayers);
 
     for (let i = 0; i < newLayers.length; i++) {
       const shape = newLayers[i];
@@ -1860,15 +1981,37 @@ const CanvasEditor = ({ project }) => {
     alert("New layers saved and refreshed!");
   };
 
+  // useEffect(() => {
+  //   const stage = stageRef.current;
+  //   const transformer = transformerRef.current;
+
+  //   if (!transformer || !stage) return;
+
+  //   if (!selectedId) {
+  //     transformer.nodes([]);
+  //     transformer.getLayer()?.batchDraw();
+  //     return;
+  //   }
+
+  //   const selectedNode = stage.findOne(`#${selectedId.toString()}`);
+  //   if (selectedNode) {
+  //     transformer.nodes([selectedNode]);
+  //     transformer.getLayer()?.batchDraw();
+  //   } else {
+  //     transformer.nodes([]);
+  //     transformer.getLayer()?.batchDraw();
+  //   }
+  // }, [selectedId, shapes]);
+
   useEffect(() => {
     const stage = stageRef.current;
     const transformer = transformerRef.current;
 
     if (!transformer || !stage) return;
 
-    if (!selectedId) {
+    // Clear selection if no selectedId or shape not found
+    if (!selectedId || !shapes.some((s) => s.id === selectedId)) {
       transformer.nodes([]);
-      transformer.getLayer()?.batchDraw();
       return;
     }
 
@@ -1888,9 +2031,21 @@ const CanvasEditor = ({ project }) => {
       id: shape.id.toString(),
       draggable: mode === shapeTypes.SELECT,
       rotation: shape.rotation || 0,
+      // onClick: (e) => {
+      //   if (mode === shapeTypes.SELECT) {
+      //     setSelectedId(shape.id);
+      //   } else if (mode === shapeTypes.ERASER) {
+      //     pushToUndo();
+      //     setShapes((prev) => prev.filter((s) => s.id !== shape.id));
+      //     setSelectedId(null);
+      //     e.cancelBubble = true;
+      //   }
+      // },
+
       onClick: (e) => {
         if (mode === shapeTypes.SELECT) {
-          setSelectedId(shape.id);
+          handleSelect(shape.id);
+          e.cancelBubble = true;
         } else if (mode === shapeTypes.ERASER) {
           pushToUndo();
           setShapes((prev) => prev.filter((s) => s.id !== shape.id));
@@ -1898,6 +2053,7 @@ const CanvasEditor = ({ project }) => {
           e.cancelBubble = true;
         }
       },
+
       onTap: (e) => {
         if (mode === shapeTypes.SELECT) {
           setSelectedId(shape.id);
