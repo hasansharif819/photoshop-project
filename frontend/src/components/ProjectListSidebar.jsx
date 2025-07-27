@@ -621,10 +621,6 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                     fontWeight: selectedId === project.id ? "600" : "normal",
                     color: selectedId === project.id ? "#2563EB" : "#1F2937",
                   }}
-                  // onClick={(e) => {
-                  //   e.stopPropagation();
-                  //   navigate(`/projects/${project.id}`);
-                  // }}
                 >
                   {project.title}
                 </span>
@@ -780,7 +776,6 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                                 navigate(
                                   `/projects/${image.id}?layer=${layer.id}`
                                 );
-                                window.location.reload();
                               }}
                             >
                               <div
