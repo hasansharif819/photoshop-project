@@ -648,7 +648,7 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                       >
                         <FaImage style={{ marginRight: "8px", color: "#6B7280", fontSize: "10px" }} />
                         <span
-                        title={image.title}
+                          title={image.title}
                           style={{
                             maxWidth: "150px",
                             flex: 1,
@@ -681,6 +681,41 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                     </div>
                   </div>
                 ))}
+
+                {/* Add New Image Button - NEW CODE */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "8px 12px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    backgroundColor: "#F3F4F6",
+                    marginTop: "8px",
+                    border: "1px dashed #D1D5DB",
+                    transition: "all 0.2s",
+                  }}
+                  onClick={() => openUploadModal(project.id)}
+                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#E5E7EB")}
+                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#F3F4F6")}
+                >
+                  <FaPlus
+                    style={{
+                      marginRight: "8px",
+                      color: "#6B7280",
+                      fontSize: "10px"
+                    }}
+                  />
+                  <span
+                    style={{
+                      color: "#4B5563",
+                      fontSize: "13px",
+                      fontWeight: "500"
+                    }}
+                  >
+                    Add New Image
+                  </span>
+                </div>
               </div>
             )}
           </div>
@@ -694,7 +729,7 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
             borderTop: "1px solid #E5E7EB",
             paddingTop: "12px",
             marginTop: "16px",
-            maxHeight: "30%", 
+            maxHeight: "30%",
             overflowY: "auto",
           }}
         >
