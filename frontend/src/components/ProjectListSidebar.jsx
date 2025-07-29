@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "../api";
 import Modal from "react-modal";
@@ -43,6 +43,7 @@ const DeleteConfirmationModal = ({
   onConfirm,
   itemType,
   itemName,
+  fetchProjects,
 }) => (
   <Modal
     isOpen={isOpen}
@@ -120,7 +121,13 @@ const DeleteConfirmationModal = ({
   </Modal>
 );
 
-const UploadImageModal = ({ projectId, isOpen, onClose, onSuccess }) => {
+const UploadImageModal = ({
+  projectId,
+  isOpen,
+  onClose,
+  onSuccess,
+  fetchProjects,
+}) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState(null);
@@ -171,6 +178,7 @@ const UploadImageModal = ({ projectId, isOpen, onClose, onSuccess }) => {
       );
 
       onClose();
+      await fetchProjects();
       navigate(`/projects/${response?.data?.id}`);
     } catch (err) {
       console.error("Upload failed:", err);
@@ -403,8 +411,8 @@ const UploadImageModal = ({ projectId, isOpen, onClose, onSuccess }) => {
   );
 };
 
-
-const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
+const ProjectListSidebar = ({ projects, fetchProjects, onProjectUpdate }) => {
+  // const ProjectListSidebar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -422,6 +430,24 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
     projectId: null,
   });
 
+  // __________________________________________________
+
+  // const [projects, setProjects] = useState([]);
+  // const fetchProjects = async () => {
+  //   try {
+  //     const res = await axios.get("/projects/");
+  //     setProjects(res.data);
+  //   } catch (err) {
+  //     console.error("Failed to fetch projects", err);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchProjects();
+  // }, []);
+
+  // ____________________________________________________
+
   const selectedId = pathname.startsWith("/projects/")
     ? parseInt(pathname.split("/projects/")[1])
     : null;
@@ -433,7 +459,13 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
     }));
   };
 
-  const openDeleteModal = (type, id, name, projectId = null, imageId = null) => {
+  const openDeleteModal = (
+    type,
+    id,
+    name,
+    projectId = null,
+    imageId = null
+  ) => {
     setDeleteModal({
       isOpen: true,
       type,
@@ -444,9 +476,43 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
     });
   };
 
+  // const handleDelete = async ({ fetchProjects }) => {
+  //   try {
+  //     let endpoint = "";
+  //     if (deleteModal.type === "project") {
+  //       endpoint = `/projects/${deleteModal.id}/`;
+  //     } else if (deleteModal.type === "image") {
+  //       endpoint = `/images/${deleteModal.id}/`;
+  //     } else if (deleteModal.type === "layer") {
+  //       endpoint = `/layers/${deleteModal.id}/`;
+  //     }
+
+  //     await axios.delete(endpoint);
+  //     // onProjectUpdate();
+
+  //     console.log("object response === >", deleteModal);
+
+  //     await fetchProjects();
+
+  //     if (deleteModal.type === "project" && selectedId === deleteModal.id) {
+  //       navigate("/");
+  //     } else if (
+  //       deleteModal.type === "image" &&
+  //       selectedId === deleteModal.id
+  //     ) {
+  //       navigate(`/projects/${deleteModal.projectId}`);
+  //     }
+  //   } catch (err) {
+  //     console.error("Delete failed:", err);
+  //   } finally {
+  //     setDeleteModal({ isOpen: false, type: null, id: null, name: null });
+  //   }
+  // };
+
   const handleDelete = async () => {
     try {
       let endpoint = "";
+
       if (deleteModal.type === "project") {
         endpoint = `/projects/${deleteModal.id}/`;
       } else if (deleteModal.type === "image") {
@@ -455,20 +521,28 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
         endpoint = `/layers/${deleteModal.id}/`;
       }
 
-      await axios.delete(endpoint);
-      onProjectUpdate();
+      await axios.delete(endpoint); // delete request
 
+      // ✅ Call fetchProjects if provided
+      if (fetchProjects) {
+        await fetchProjects();
+      }
+
+      // ✅ Handle navigation after deletion
       if (deleteModal.type === "project" && selectedId === deleteModal.id) {
         navigate("/");
       } else if (
         deleteModal.type === "image" &&
         selectedId === deleteModal.id
       ) {
+        navigate("/");
+      } else {
         navigate(`/projects/${deleteModal.projectId}`);
       }
     } catch (err) {
       console.error("Delete failed:", err);
     } finally {
+      // ✅ Close modal
       setDeleteModal({ isOpen: false, type: null, id: null, name: null });
     }
   };
@@ -484,7 +558,9 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
   };
 
   const selectedImage = projects
-    .flatMap((project) => project.images.map((image) => ({ ...image, projectId: project.id })))
+    .flatMap((project) =>
+      project.images.map((image) => ({ ...image, projectId: project.id }))
+    )
     .find((image) => image.id === selectedId);
 
   return (
@@ -575,9 +651,21 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                 onClick={() => toggleProject(project.id)}
               >
                 {expandedProjects[project.id] ? (
-                  <FaChevronDown style={{ marginRight: "8px", color: "#6B7280", fontSize: "12px" }} />
+                  <FaChevronDown
+                    style={{
+                      marginRight: "8px",
+                      color: "#6B7280",
+                      fontSize: "12px",
+                    }}
+                  />
                 ) : (
-                  <FaChevronRight style={{ marginRight: "8px", color: "#6B7280", fontSize: "12px" }} />
+                  <FaChevronRight
+                    style={{
+                      marginRight: "8px",
+                      color: "#6B7280",
+                      fontSize: "12px",
+                    }}
+                  />
                 )}
                 <span
                   title={project.title}
@@ -646,7 +734,13 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                           flex: 1,
                         }}
                       >
-                        <FaImage style={{ marginRight: "8px", color: "#6B7280", fontSize: "10px" }} />
+                        <FaImage
+                          style={{
+                            marginRight: "8px",
+                            color: "#6B7280",
+                            fontSize: "10px",
+                          }}
+                        />
                         <span
                           title={image.title}
                           style={{
@@ -655,8 +749,10 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
-                            fontWeight: selectedId === image.id ? "600" : "normal",
-                            color: selectedId === image.id ? "#2563EB" : "#1F2937",
+                            fontWeight:
+                              selectedId === image.id ? "600" : "normal",
+                            color:
+                              selectedId === image.id ? "#2563EB" : "#1F2937",
                           }}
                         >
                           {image.title}
@@ -665,7 +761,12 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          openDeleteModal("image", image.id, image.name, project.id);
+                          openDeleteModal(
+                            "image",
+                            image.id,
+                            image.name,
+                            project.id
+                          );
                         }}
                         style={{
                           color: "#9CA3AF",
@@ -673,8 +774,12 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                           border: "none",
                           cursor: "pointer",
                         }}
-                        onMouseOver={(e) => (e.currentTarget.style.color = "#EF4444")}
-                        onMouseOut={(e) => (e.currentTarget.style.color = "#9CA3AF")}
+                        onMouseOver={(e) =>
+                          (e.currentTarget.style.color = "#EF4444")
+                        }
+                        onMouseOut={(e) =>
+                          (e.currentTarget.style.color = "#9CA3AF")
+                        }
                       >
                         <FaTrash size={12} />
                       </button>
@@ -696,21 +801,25 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                     transition: "all 0.2s",
                   }}
                   onClick={() => openUploadModal(project.id)}
-                  onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#E5E7EB")}
-                  onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#F3F4F6")}
+                  onMouseOver={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#E5E7EB")
+                  }
+                  onMouseOut={(e) =>
+                    (e.currentTarget.style.backgroundColor = "#F3F4F6")
+                  }
                 >
                   <FaPlus
                     style={{
                       marginRight: "8px",
                       color: "#6B7280",
-                      fontSize: "10px"
+                      fontSize: "10px",
                     }}
                   />
                   <span
                     style={{
                       color: "#4B5563",
                       fontSize: "13px",
-                      fontWeight: "500"
+                      fontWeight: "500",
                     }}
                   >
                     Add New Image
@@ -733,7 +842,14 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
             overflowY: "auto",
           }}
         >
-          <h4 style={{ fontSize: "16px", fontWeight: "bold", color: "#374151", marginBottom: "8px" }}>
+          <h4
+            style={{
+              fontSize: "16px",
+              fontWeight: "bold",
+              color: "#374151",
+              marginBottom: "8px",
+            }}
+          >
             Layers Panel
           </h4>
           {selectedImage.layers?.length > 0 ? (
@@ -751,14 +867,34 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                   fontSize: "14px",
                 }}
               >
-                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <span
+                  style={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {layer.name}{" "}
-                  <span style={{ color: "#6B7280", fontStyle: "italic", fontSize: "12px" }}>
+                  <span
+                    style={{
+                      color: "#6B7280",
+                      fontStyle: "italic",
+                      fontSize: "12px",
+                    }}
+                  >
                     ({layer.shape_type})
                   </span>
                 </span>
                 <button
-                  onClick={() => openDeleteModal("layer", layer.id, layer.name, selectedImage.projectId, selectedImage.id)}
+                  onClick={() =>
+                    openDeleteModal(
+                      "layer",
+                      layer.id,
+                      layer.name,
+                      selectedImage.projectId,
+                      selectedImage.id
+                    )
+                  }
                   style={{
                     color: "#9CA3AF",
                     background: "none",
@@ -773,11 +909,12 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
               </div>
             ))
           ) : (
-            <p style={{ fontSize: "13px", color: "#9CA3AF" }}>No layers found.</p>
+            <p style={{ fontSize: "13px", color: "#9CA3AF" }}>
+              No layers found.
+            </p>
           )}
         </div>
       )}
-
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
@@ -788,6 +925,7 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
         onConfirm={handleDelete}
         itemType={deleteModal.type}
         itemName={deleteModal.name}
+        fetchProjects={fetchProjects}
       />
 
       {/* Upload Image Modal */}
@@ -796,13 +934,13 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
         isOpen={uploadModal.isOpen}
         onClose={() => setUploadModal({ isOpen: false, projectId: null })}
         onSuccess={handleImageUploadSuccess}
+        fetchProjects={fetchProjects}
       />
     </div>
   );
 };
 
 export default ProjectListSidebar;
-
 
 // const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
 //   const navigate = useNavigate();
@@ -1315,4 +1453,3 @@ export default ProjectListSidebar;
 // };
 
 // export default ProjectListSidebar;
-

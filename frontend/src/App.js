@@ -75,14 +75,15 @@ const AppLayout = () => {
                 <UploadProjectPage
                   onUploadSuccess={async (project, navigate) => {
                     await fetchProjects();
-                    navigate(`/projects/${project.id}`);
+                    navigate(`/projects/${project?.images?.[0]?.id}`);
                   }}
                 />
               }
             />
           </Routes>
         </div>
-        <ProjectListSidebar projects={projects} />
+        <ProjectListSidebar projects={projects} fetchProjects={fetchProjects} />
+        {/* <ProjectListSidebar /> */}
       </div>
     </section>
   );
