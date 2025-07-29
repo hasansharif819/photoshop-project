@@ -403,11 +403,11 @@ const UploadImageModal = ({ projectId, isOpen, onClose, onSuccess }) => {
   );
 };
 
+
 const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  // State for expanded projects, delete modals, and upload modal
   const [expandedProjects, setExpandedProjects] = useState({});
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
@@ -422,12 +422,10 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
     projectId: null,
   });
 
-  // Extract selected ID from URL
   const selectedId = pathname.startsWith("/projects/")
     ? parseInt(pathname.split("/projects/")[1])
     : null;
 
-  // Toggle project expansion
   const toggleProject = (projectId) => {
     setExpandedProjects((prev) => ({
       ...prev,
@@ -435,14 +433,7 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
     }));
   };
 
-  // Open delete confirmation modal
-  const openDeleteModal = (
-    type,
-    id,
-    name,
-    projectId = null,
-    imageId = null
-  ) => {
+  const openDeleteModal = (type, id, name, projectId = null, imageId = null) => {
     setDeleteModal({
       isOpen: true,
       type,
@@ -453,7 +444,6 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
     });
   };
 
-  // Handle delete confirmation
   const handleDelete = async () => {
     try {
       let endpoint = "";
@@ -466,9 +456,8 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
       }
 
       await axios.delete(endpoint);
-      onProjectUpdate(); // Refresh the project list
+      onProjectUpdate();
 
-      // If we're deleting the currently selected project/image, navigate away
       if (deleteModal.type === "project" && selectedId === deleteModal.id) {
         navigate("/");
       } else if (
@@ -484,20 +473,19 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
     }
   };
 
-  // Open upload image modal
   const openUploadModal = (projectId) => {
-    setUploadModal({
-      isOpen: true,
-      projectId,
-    });
+    setUploadModal({ isOpen: true, projectId });
   };
 
-  // Handle successful image upload
   const handleImageUploadSuccess = (newImage) => {
-    onProjectUpdate(); // Refresh the project list
+    onProjectUpdate();
     setUploadModal({ isOpen: false, projectId: null });
-    navigate(`/projects/${newImage.id}`); // Navigate to the new image
+    navigate(`/projects/${newImage.id}`);
   };
+
+  const selectedImage = projects
+    .flatMap((project) => project.images.map((image) => ({ ...image, projectId: project.id })))
+    .find((image) => image.id === selectedId);
 
   return (
     <div
@@ -522,13 +510,7 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
           borderBottom: "1px solid #F3F4F6",
         }}
       >
-        <h3
-          style={{
-            fontSize: "18px",
-            fontWeight: "bold",
-            color: "#1F2937",
-          }}
-        >
+        <h3 style={{ fontSize: "18px", fontWeight: "bold", color: "#1F2937" }}>
           Projects
         </h3>
         <button
@@ -550,12 +532,10 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
           onMouseOver={(e) => {
             e.currentTarget.style.background =
               "linear-gradient(to right, #2563EB, #1D4ED8)";
-            e.currentTarget.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.1)";
           }}
           onMouseOut={(e) => {
             e.currentTarget.style.background =
               "linear-gradient(to right, #3B82F6, #2563EB)";
-            e.currentTarget.style.boxShadow = "0 1px 2px rgba(0, 0, 0, 0.1)";
           }}
         >
           <FaPlus style={{ fontSize: "12px" }} />
@@ -574,7 +554,6 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                 padding: "12px",
                 borderRadius: "8px",
                 cursor: "pointer",
-                transition: "background-color 0.2s",
                 backgroundColor:
                   selectedId === project.id ? "#EFF6FF" : "#F9FAFB",
                 border:
@@ -596,23 +575,12 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                 onClick={() => toggleProject(project.id)}
               >
                 {expandedProjects[project.id] ? (
-                  <FaChevronDown
-                    style={{
-                      marginRight: "8px",
-                      color: "#6B7280",
-                      fontSize: "12px",
-                    }}
-                  />
+                  <FaChevronDown style={{ marginRight: "8px", color: "#6B7280", fontSize: "12px" }} />
                 ) : (
-                  <FaChevronRight
-                    style={{
-                      marginRight: "8px",
-                      color: "#6B7280",
-                      fontSize: "12px",
-                    }}
-                  />
+                  <FaChevronRight style={{ marginRight: "8px", color: "#6B7280", fontSize: "12px" }} />
                 )}
                 <span
+                  title={project.title}
                   style={{
                     flex: 1,
                     overflow: "hidden",
@@ -636,11 +604,9 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  transition: "color 0.2s",
                 }}
                 onMouseOver={(e) => (e.currentTarget.style.color = "#EF4444")}
                 onMouseOut={(e) => (e.currentTarget.style.color = "#9CA3AF")}
-                title="Delete Project"
               >
                 <FaTrash size={14} />
               </button>
@@ -648,239 +614,135 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
 
             {expandedProjects[project.id] && (
               <div style={{ marginLeft: "24px", marginTop: "4px" }}>
-                {project.images.length > 0 ? (
-                  project.images.map((image) => (
-                    <div key={image.id} style={{ marginBottom: "4px" }}>
+                {project.images.map((image) => (
+                  <div key={image.id} style={{ marginBottom: "4px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "8px 12px",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        backgroundColor:
+                          selectedId === image.id ? "#EFF6FF" : "#F3F4F6",
+                      }}
+                      onMouseOver={(e) => {
+                        if (selectedId !== image.id) {
+                          e.currentTarget.style.backgroundColor = "#E5E7EB";
+                        }
+                      }}
+                      onMouseOut={(e) => {
+                        if (selectedId !== image.id) {
+                          e.currentTarget.style.backgroundColor = "#F3F4F6";
+                        }
+                      }}
+                      onClick={() => navigate(`/projects/${image.id}`)}
+                    >
                       <div
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          justifyContent: "space-between",
-                          padding: "8px 12px",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          transition: "background-color 0.2s",
-                          backgroundColor:
-                            selectedId === image.id ? "#EFF6FF" : "#F3F4F6",
+                          flex: 1,
                         }}
-                        onMouseOver={(e) => {
-                          if (selectedId !== image.id) {
-                            e.currentTarget.style.backgroundColor = "#E5E7EB";
-                          }
-                        }}
-                        onMouseOut={(e) => {
-                          if (selectedId !== image.id) {
-                            e.currentTarget.style.backgroundColor = "#F3F4F6";
-                          }
-                        }}
-                        onClick={() => navigate(`/projects/${image.id}`)}
                       >
-                        <div
+                        <FaImage style={{ marginRight: "8px", color: "#6B7280", fontSize: "10px" }} />
+                        <span
+                        title={image.title}
                           style={{
-                            display: "flex",
-                            alignItems: "center",
+                            maxWidth: "150px",
                             flex: 1,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            fontWeight: selectedId === image.id ? "600" : "normal",
+                            color: selectedId === image.id ? "#2563EB" : "#1F2937",
                           }}
                         >
-                          <FaImage
-                            style={{
-                              marginRight: "8px",
-                              color: "#6B7280",
-                              fontSize: "10px",
-                            }}
-                          />
-                          <span
-                            style={{
-                              flex: 1,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                              fontSize: "14px",
-                              fontWeight:
-                                selectedId === image.id ? "500" : "normal",
-                              color:
-                                selectedId === image.id ? "#2563EB" : "#374151",
-                            }}
-                          >
-                            {image.title}
-                          </span>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openDeleteModal(
-                              "image",
-                              image.id,
-                              image.title,
-                              project.id
-                            );
-                          }}
-                          style={{
-                            color: "#9CA3AF",
-                            marginLeft: "8px",
-                            background: "none",
-                            border: "none",
-                            cursor: "pointer",
-                            transition: "color 0.2s",
-                          }}
-                          onMouseOver={(e) =>
-                            (e.currentTarget.style.color = "#EF4444")
-                          }
-                          onMouseOut={(e) =>
-                            (e.currentTarget.style.color = "#9CA3AF")
-                          }
-                          title="Delete Image"
-                        >
-                          <FaTrash size={12} />
-                        </button>
+                          {image.title}
+                        </span>
                       </div>
-
-                      {selectedId === image.id && image?.layers?.length > 0 && (
-                        <div style={{ marginLeft: "16px", marginTop: "4px" }}>
-                          <div
-                            style={{
-                              fontSize: "12px",
-                              fontWeight: "500",
-                              color: "#6B7280",
-                              marginBottom: "4px",
-                              paddingLeft: "8px",
-                            }}
-                          >
-                            Layers:
-                          </div>
-                          {image?.layers?.map((layer) => (
-                            <div
-                              key={layer.id}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                cursor: "pointer",
-                                justifyContent: "space-between",
-                                backgroundColor: "#F9FAFB",
-                                padding: "4px 8px 4px 16px",
-                                borderRadius: "4px",
-                                fontSize: "12px",
-                                marginBottom: "4px",
-                                transition: "background-color 0.2s",
-                              }}
-                              onMouseOver={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  "#F3F4F6")
-                              }
-                              onMouseOut={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  "#F9FAFB")
-                              }
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(
-                                  `/projects/${image.id}?layer=${layer.id}`
-                                );
-                              }}
-                            >
-                              <div
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <FaLayerGroup
-                                  style={{
-                                    marginRight: "8px",
-                                    color: "#9CA3AF",
-                                    fontSize: "10px",
-                                  }}
-                                />
-                                <span
-                                  style={{
-                                    color: "#4B5563",
-                                  }}
-                                >
-                                  {layer?.shape_type}
-                                </span>
-                              </div>
-                              <button
-                                onClick={() =>
-                                  openDeleteModal(
-                                    "layer",
-                                    layer.id,
-                                    `Layer ${layer.id}`,
-                                    project.id,
-                                    image.id
-                                  )
-                                }
-                                style={{
-                                  color: "#9CA3AF",
-                                  marginLeft: "8px",
-                                  background: "none",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  transition: "color 0.2s",
-                                }}
-                                onMouseOver={(e) =>
-                                  (e.currentTarget.style.color = "#EF4444")
-                                }
-                                onMouseOut={(e) =>
-                                  (e.currentTarget.style.color = "#9CA3AF")
-                                }
-                                title="Delete Layer"
-                              >
-                                <FaTrash size={10} />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteModal("image", image.id, image.name, project.id);
+                        }}
+                        style={{
+                          color: "#9CA3AF",
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                        }}
+                        onMouseOver={(e) => (e.currentTarget.style.color = "#EF4444")}
+                        onMouseOut={(e) => (e.currentTarget.style.color = "#9CA3AF")}
+                      >
+                        <FaTrash size={12} />
+                      </button>
                     </div>
-                  ))
-                ) : (
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#6B7280",
-                      fontStyle: "italic",
-                      padding: "8px",
-                      backgroundColor: "#F9FAFB",
-                      borderRadius: "6px",
-                    }}
-                  >
-                    No images in this project
                   </div>
-                )}
-
-                <button
-                  onClick={() => openUploadModal(project.id)}
-                  style={{
-                    marginTop: "8px",
-                    fontSize: "12px",
-                    display: "flex",
-                    alignItems: "center",
-                    color: "#3B82F6",
-                    backgroundColor: "#EFF6FF",
-                    padding: "4px 8px",
-                    borderRadius: "6px",
-                    border: "none",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                    gap: "4px",
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.color = "#2563EB";
-                    e.currentTarget.style.backgroundColor = "#DBEAFE";
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.color = "#3B82F6";
-                    e.currentTarget.style.backgroundColor = "#EFF6FF";
-                  }}
-                >
-                  <FaPlus size={10} />
-                  <span>Add New Image</span>
-                </button>
+                ))}
               </div>
             )}
           </div>
         ))}
       </div>
+
+      {/* 🔽 LAYER PANEL */}
+      {selectedImage && (
+        <div
+          style={{
+            borderTop: "1px solid #E5E7EB",
+            paddingTop: "12px",
+            marginTop: "16px",
+            maxHeight: "30%", 
+            overflowY: "auto",
+          }}
+        >
+          <h4 style={{ fontSize: "16px", fontWeight: "bold", color: "#374151", marginBottom: "8px" }}>
+            Layers Panel
+          </h4>
+          {selectedImage.layers?.length > 0 ? (
+            selectedImage.layers.map((layer) => (
+              <div
+                key={layer.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "6px 8px",
+                  borderRadius: "4px",
+                  backgroundColor: "#F9FAFB",
+                  marginBottom: "4px",
+                  fontSize: "14px",
+                }}
+              >
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {layer.name}{" "}
+                  <span style={{ color: "#6B7280", fontStyle: "italic", fontSize: "12px" }}>
+                    ({layer.shape_type})
+                  </span>
+                </span>
+                <button
+                  onClick={() => openDeleteModal("layer", layer.id, layer.name, selectedImage.projectId, selectedImage.id)}
+                  style={{
+                    color: "#9CA3AF",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                  }}
+                  onMouseOver={(e) => (e.currentTarget.style.color = "#EF4444")}
+                  onMouseOut={(e) => (e.currentTarget.style.color = "#9CA3AF")}
+                >
+                  <FaTrash size={10} />
+                </button>
+              </div>
+            ))
+          ) : (
+            <p style={{ fontSize: "13px", color: "#9CA3AF" }}>No layers found.</p>
+          )}
+        </div>
+      )}
+
 
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
@@ -900,17 +762,522 @@ const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
         onClose={() => setUploadModal({ isOpen: false, projectId: null })}
         onSuccess={handleImageUploadSuccess}
       />
-
-      <style>
-        {`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-        `}
-      </style>
     </div>
   );
 };
 
 export default ProjectListSidebar;
+
+
+// const ProjectListSidebar = ({ projects, onProjectUpdate }) => {
+//   const navigate = useNavigate();
+//   const { pathname } = useLocation();
+
+//   // State for expanded projects, delete modals, and upload modal
+//   const [expandedProjects, setExpandedProjects] = useState({});
+//   const [deleteModal, setDeleteModal] = useState({
+//     isOpen: false,
+//     type: null,
+//     id: null,
+//     name: null,
+//     projectId: null,
+//     imageId: null,
+//   });
+//   const [uploadModal, setUploadModal] = useState({
+//     isOpen: false,
+//     projectId: null,
+//   });
+
+//   // Extract selected ID from URL
+//   const selectedId = pathname.startsWith("/projects/")
+//     ? parseInt(pathname.split("/projects/")[1])
+//     : null;
+
+//   // Toggle project expansion
+//   const toggleProject = (projectId) => {
+//     setExpandedProjects((prev) => ({
+//       ...prev,
+//       [projectId]: !prev[projectId],
+//     }));
+//   };
+
+//   // Open delete confirmation modal
+//   const openDeleteModal = (
+//     type,
+//     id,
+//     name,
+//     projectId = null,
+//     imageId = null
+//   ) => {
+//     setDeleteModal({
+//       isOpen: true,
+//       type,
+//       id,
+//       name,
+//       projectId,
+//       imageId,
+//     });
+//   };
+
+//   // Handle delete confirmation
+//   const handleDelete = async () => {
+//     try {
+//       let endpoint = "";
+//       if (deleteModal.type === "project") {
+//         endpoint = `/projects/${deleteModal.id}/`;
+//       } else if (deleteModal.type === "image") {
+//         endpoint = `/images/${deleteModal.id}/`;
+//       } else if (deleteModal.type === "layer") {
+//         endpoint = `/layers/${deleteModal.id}/`;
+//       }
+
+//       await axios.delete(endpoint);
+//       onProjectUpdate(); // Refresh the project list
+
+//       // If we're deleting the currently selected project/image, navigate away
+//       if (deleteModal.type === "project" && selectedId === deleteModal.id) {
+//         navigate("/");
+//       } else if (
+//         deleteModal.type === "image" &&
+//         selectedId === deleteModal.id
+//       ) {
+//         navigate(`/projects/${deleteModal.projectId}`);
+//       }
+//     } catch (err) {
+//       console.error("Delete failed:", err);
+//     } finally {
+//       setDeleteModal({ isOpen: false, type: null, id: null, name: null });
+//     }
+//   };
+
+//   // Open upload image modal
+//   const openUploadModal = (projectId) => {
+//     setUploadModal({
+//       isOpen: true,
+//       projectId,
+//     });
+//   };
+
+//   // Handle successful image upload
+//   const handleImageUploadSuccess = (newImage) => {
+//     onProjectUpdate(); // Refresh the project list
+//     setUploadModal({ isOpen: false, projectId: null });
+//     navigate(`/projects/${newImage.id}`); // Navigate to the new image
+//   };
+
+//   return (
+//     <div
+//       style={{
+//         width: "288px",
+//         padding: "16px",
+//         borderLeft: "1px solid #E5E7EB",
+//         backgroundColor: "white",
+//         height: "100%",
+//         display: "flex",
+//         flexDirection: "column",
+//         boxShadow: "1px 0 3px rgba(0, 0, 0, 0.05)",
+//       }}
+//     >
+//       <div
+//         style={{
+//           display: "flex",
+//           justifyContent: "space-between",
+//           alignItems: "center",
+//           marginBottom: "16px",
+//           paddingBottom: "16px",
+//           borderBottom: "1px solid #F3F4F6",
+//         }}
+//       >
+//         <h3
+//           style={{
+//             fontSize: "18px",
+//             fontWeight: "bold",
+//             color: "#1F2937",
+//           }}
+//         >
+//           Projects
+//         </h3>
+//         <button
+//           onClick={() => navigate("/upload")}
+//           style={{
+//             padding: "8px 12px",
+//             background: "linear-gradient(to right, #3B82F6, #2563EB)",
+//             color: "white",
+//             borderRadius: "8px",
+//             border: "none",
+//             cursor: "pointer",
+//             display: "flex",
+//             alignItems: "center",
+//             gap: "4px",
+//             fontSize: "14px",
+//             boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+//             transition: "all 0.2s",
+//           }}
+//           onMouseOver={(e) => {
+//             e.currentTarget.style.background =
+//               "linear-gradient(to right, #2563EB, #1D4ED8)";
+//             e.currentTarget.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.1)";
+//           }}
+//           onMouseOut={(e) => {
+//             e.currentTarget.style.background =
+//               "linear-gradient(to right, #3B82F6, #2563EB)";
+//             e.currentTarget.style.boxShadow = "0 1px 2px rgba(0, 0, 0, 0.1)";
+//           }}
+//         >
+//           <FaPlus style={{ fontSize: "12px" }} />
+//           <span>New Project</span>
+//         </button>
+//       </div>
+
+//       <div style={{ flex: 1, overflowY: "auto", paddingRight: "8px" }}>
+//         {projects.map((project) => (
+//           <div key={project.id} style={{ marginBottom: "8px" }}>
+//             <div
+//               style={{
+//                 display: "flex",
+//                 alignItems: "center",
+//                 justifyContent: "space-between",
+//                 padding: "12px",
+//                 borderRadius: "8px",
+//                 cursor: "pointer",
+//                 transition: "background-color 0.2s",
+//                 backgroundColor:
+//                   selectedId === project.id ? "#EFF6FF" : "#F9FAFB",
+//                 border:
+//                   selectedId === project.id ? "1px solid #DBEAFE" : "none",
+//               }}
+//               onMouseOver={(e) => {
+//                 if (selectedId !== project.id) {
+//                   e.currentTarget.style.backgroundColor = "#F3F4F6";
+//                 }
+//               }}
+//               onMouseOut={(e) => {
+//                 if (selectedId !== project.id) {
+//                   e.currentTarget.style.backgroundColor = "#F9FAFB";
+//                 }
+//               }}
+//             >
+//               <div
+//                 style={{ display: "flex", alignItems: "center", flex: 1 }}
+//                 onClick={() => toggleProject(project.id)}
+//               >
+//                 {expandedProjects[project.id] ? (
+//                   <FaChevronDown
+//                     style={{
+//                       marginRight: "8px",
+//                       color: "#6B7280",
+//                       fontSize: "12px",
+//                     }}
+//                   />
+//                 ) : (
+//                   <FaChevronRight
+//                     style={{
+//                       marginRight: "8px",
+//                       color: "#6B7280",
+//                       fontSize: "12px",
+//                     }}
+//                   />
+//                 )}
+//                 <span
+//                   style={{
+//                     flex: 1,
+//                     overflow: "hidden",
+//                     textOverflow: "ellipsis",
+//                     whiteSpace: "nowrap",
+//                     fontWeight: selectedId === project.id ? "600" : "normal",
+//                     color: selectedId === project.id ? "#2563EB" : "#1F2937",
+//                   }}
+//                 >
+//                   {project.title}
+//                 </span>
+//               </div>
+//               <button
+//                 onClick={(e) => {
+//                   e.stopPropagation();
+//                   openDeleteModal("project", project.id, project.title);
+//                 }}
+//                 style={{
+//                   color: "#9CA3AF",
+//                   marginLeft: "8px",
+//                   background: "none",
+//                   border: "none",
+//                   cursor: "pointer",
+//                   transition: "color 0.2s",
+//                 }}
+//                 onMouseOver={(e) => (e.currentTarget.style.color = "#EF4444")}
+//                 onMouseOut={(e) => (e.currentTarget.style.color = "#9CA3AF")}
+//                 title="Delete Project"
+//               >
+//                 <FaTrash size={14} />
+//               </button>
+//             </div>
+
+//             {expandedProjects[project.id] && (
+//               <div style={{ marginLeft: "24px", marginTop: "4px" }}>
+//                 {project.images.length > 0 ? (
+//                   project.images.map((image) => (
+//                     <div key={image.id} style={{ marginBottom: "4px" }}>
+//                       <div
+//                         style={{
+//                           display: "flex",
+//                           alignItems: "center",
+//                           justifyContent: "space-between",
+//                           padding: "8px 12px",
+//                           borderRadius: "6px",
+//                           cursor: "pointer",
+//                           transition: "background-color 0.2s",
+//                           backgroundColor:
+//                             selectedId === image.id ? "#EFF6FF" : "#F3F4F6",
+//                         }}
+//                         onMouseOver={(e) => {
+//                           if (selectedId !== image.id) {
+//                             e.currentTarget.style.backgroundColor = "#E5E7EB";
+//                           }
+//                         }}
+//                         onMouseOut={(e) => {
+//                           if (selectedId !== image.id) {
+//                             e.currentTarget.style.backgroundColor = "#F3F4F6";
+//                           }
+//                         }}
+//                         onClick={() => navigate(`/projects/${image.id}`)}
+//                       >
+//                         <div
+//                           style={{
+//                             display: "flex",
+//                             alignItems: "center",
+//                             flex: 1,
+//                           }}
+//                         >
+//                           <FaImage
+//                             style={{
+//                               marginRight: "8px",
+//                               color: "#6B7280",
+//                               fontSize: "10px",
+//                             }}
+//                           />
+//                           <span
+//                             style={{
+//                               flex: 1,
+//                               overflow: "hidden",
+//                               textOverflow: "ellipsis",
+//                               whiteSpace: "nowrap",
+//                               fontSize: "14px",
+//                               fontWeight:
+//                                 selectedId === image.id ? "500" : "normal",
+//                               color:
+//                                 selectedId === image.id ? "#2563EB" : "#374151",
+//                             }}
+//                           >
+//                             {image.title}
+//                           </span>
+//                         </div>
+//                         <button
+//                           onClick={(e) => {
+//                             e.stopPropagation();
+//                             openDeleteModal(
+//                               "image",
+//                               image.id,
+//                               image.title,
+//                               project.id
+//                             );
+//                           }}
+//                           style={{
+//                             color: "#9CA3AF",
+//                             marginLeft: "8px",
+//                             background: "none",
+//                             border: "none",
+//                             cursor: "pointer",
+//                             transition: "color 0.2s",
+//                           }}
+//                           onMouseOver={(e) =>
+//                             (e.currentTarget.style.color = "#EF4444")
+//                           }
+//                           onMouseOut={(e) =>
+//                             (e.currentTarget.style.color = "#9CA3AF")
+//                           }
+//                           title="Delete Image"
+//                         >
+//                           <FaTrash size={12} />
+//                         </button>
+//                       </div>
+
+//                       {selectedId === image.id && image?.layers?.length > 0 && (
+//                         <div style={{ marginLeft: "16px", marginTop: "4px" }}>
+//                           <div
+//                             style={{
+//                               fontSize: "12px",
+//                               fontWeight: "500",
+//                               color: "#6B7280",
+//                               marginBottom: "4px",
+//                               paddingLeft: "8px",
+//                             }}
+//                           >
+//                             Layers:
+//                           </div>
+//                           {image?.layers?.map((layer) => (
+//                             <div
+//                               key={layer.id}
+//                               style={{
+//                                 display: "flex",
+//                                 alignItems: "center",
+//                                 cursor: "pointer",
+//                                 justifyContent: "space-between",
+//                                 backgroundColor: "#F9FAFB",
+//                                 padding: "4px 8px 4px 16px",
+//                                 borderRadius: "4px",
+//                                 fontSize: "12px",
+//                                 marginBottom: "4px",
+//                                 transition: "background-color 0.2s",
+//                               }}
+//                               onMouseOver={(e) =>
+//                                 (e.currentTarget.style.backgroundColor =
+//                                   "#F3F4F6")
+//                               }
+//                               onMouseOut={(e) =>
+//                                 (e.currentTarget.style.backgroundColor =
+//                                   "#F9FAFB")
+//                               }
+//                               onClick={(e) => {
+//                                 e.stopPropagation();
+//                                 navigate(
+//                                   `/projects/${image.id}?layer=${layer.id}`
+//                                 );
+//                               }}
+//                             >
+//                               <div
+//                                 style={{
+//                                   display: "flex",
+//                                   alignItems: "center",
+//                                 }}
+//                               >
+//                                 <FaLayerGroup
+//                                   style={{
+//                                     marginRight: "8px",
+//                                     color: "#9CA3AF",
+//                                     fontSize: "10px",
+//                                   }}
+//                                 />
+//                                 <span
+//                                   style={{
+//                                     color: "#4B5563",
+//                                   }}
+//                                 >
+//                                   {layer?.shape_type}
+//                                 </span>
+//                               </div>
+//                               <button
+//                                 onClick={() =>
+//                                   openDeleteModal(
+//                                     "layer",
+//                                     layer.id,
+//                                     `Layer ${layer.id}`,
+//                                     project.id,
+//                                     image.id
+//                                   )
+//                                 }
+//                                 style={{
+//                                   color: "#9CA3AF",
+//                                   marginLeft: "8px",
+//                                   background: "none",
+//                                   border: "none",
+//                                   cursor: "pointer",
+//                                   transition: "color 0.2s",
+//                                 }}
+//                                 onMouseOver={(e) =>
+//                                   (e.currentTarget.style.color = "#EF4444")
+//                                 }
+//                                 onMouseOut={(e) =>
+//                                   (e.currentTarget.style.color = "#9CA3AF")
+//                                 }
+//                                 title="Delete Layer"
+//                               >
+//                                 <FaTrash size={10} />
+//                               </button>
+//                             </div>
+//                           ))}
+//                         </div>
+//                       )}
+//                     </div>
+//                   ))
+//                 ) : (
+//                   <div
+//                     style={{
+//                       fontSize: "12px",
+//                       color: "#6B7280",
+//                       fontStyle: "italic",
+//                       padding: "8px",
+//                       backgroundColor: "#F9FAFB",
+//                       borderRadius: "6px",
+//                     }}
+//                   >
+//                     No images in this project
+//                   </div>
+//                 )}
+
+//                 <button
+//                   onClick={() => openUploadModal(project.id)}
+//                   style={{
+//                     marginTop: "8px",
+//                     fontSize: "12px",
+//                     display: "flex",
+//                     alignItems: "center",
+//                     color: "#3B82F6",
+//                     backgroundColor: "#EFF6FF",
+//                     padding: "4px 8px",
+//                     borderRadius: "6px",
+//                     border: "none",
+//                     cursor: "pointer",
+//                     transition: "all 0.2s",
+//                     gap: "4px",
+//                   }}
+//                   onMouseOver={(e) => {
+//                     e.currentTarget.style.color = "#2563EB";
+//                     e.currentTarget.style.backgroundColor = "#DBEAFE";
+//                   }}
+//                   onMouseOut={(e) => {
+//                     e.currentTarget.style.color = "#3B82F6";
+//                     e.currentTarget.style.backgroundColor = "#EFF6FF";
+//                   }}
+//                 >
+//                   <FaPlus size={10} />
+//                   <span>Add New Image</span>
+//                 </button>
+//               </div>
+//             )}
+//           </div>
+//         ))}
+//       </div>
+
+//       {/* Delete Confirmation Modal */}
+//       <DeleteConfirmationModal
+//         isOpen={deleteModal.isOpen}
+//         onClose={() =>
+//           setDeleteModal({ isOpen: false, type: null, id: null, name: null })
+//         }
+//         onConfirm={handleDelete}
+//         itemType={deleteModal.type}
+//         itemName={deleteModal.name}
+//       />
+
+//       {/* Upload Image Modal */}
+//       <UploadImageModal
+//         projectId={uploadModal.projectId}
+//         isOpen={uploadModal.isOpen}
+//         onClose={() => setUploadModal({ isOpen: false, projectId: null })}
+//         onSuccess={handleImageUploadSuccess}
+//       />
+
+//       <style>
+//         {`
+//           @keyframes spin {
+//             from { transform: rotate(0deg); }
+//             to { transform: rotate(360deg); }
+//           }
+//         `}
+//       </style>
+//     </div>
+//   );
+// };
+
+// export default ProjectListSidebar;
+
