@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import axios from "../api";
 import Modal from "react-modal";
+
 import {
   FaTrash,
   FaChevronDown,
@@ -535,15 +536,26 @@ const ProjectListSidebar = ({ projects, fetchProjects, onProjectUpdate }) => {
         deleteModal.type === "image" &&
         selectedId === deleteModal.id
       ) {
-        navigate("/");
+        const { id } = useParams();
+        navigate(`/projects/${id}`);
+        // navigate("/");
       } else {
-        navigate(`/projects/${deleteModal.projectId}`);
+        const { id } = useParams();
+        navigate(`/projects/${id}`);
       }
     } catch (err) {
-      console.error("Delete failed:", err);
+      // console.error("Delete failed:", err);
+      setDeleteModal({ isOpen: false, type: null, id: null, name: null });
+      if (fetchProjects) {
+        await fetchProjects();
+      }
     } finally {
       // ✅ Close modal
       setDeleteModal({ isOpen: false, type: null, id: null, name: null });
+      if (fetchProjects) {
+        await fetchProjects();
+      }
+      window.location.reload();
     }
   };
 
