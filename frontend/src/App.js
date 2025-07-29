@@ -68,7 +68,10 @@ const AppLayout = () => {
       <div style={{ display: "flex", height: "100vh" }}>
         <div style={{ flex: 1, padding: 0 }}>
           <Routes>
-            <Route path="/projects/:id" element={<ProjectEditorPage />} />
+            <Route
+              path="/projects/:id"
+              element={<ProjectEditorPage fetchProjects={fetchProjects} />}
+            />
             <Route
               path="/upload"
               element={

@@ -1232,7 +1232,7 @@ import axios from "../api";
 import UploadImage from "./UploadImage";
 import { useLocation } from "react-router-dom";
 
-const CanvasEditor = ({ project }) => {
+const CanvasEditor = ({ project, fetchProjects }) => {
   const stageRef = useRef(null);
   const transformerRef = useRef(null);
   const [imageURL, setImageURL] = useState(null);
@@ -2044,6 +2044,7 @@ const CanvasEditor = ({ project }) => {
               : s
           )
         );
+        await fetchProjects();
       } catch (err) {
         console.error("Save failed for shape:", shape, err);
       }
