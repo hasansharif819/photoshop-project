@@ -82,7 +82,6 @@ const CanvasEditor = ({ project, fetchProjects }) => {
     }
   }, [selectedId, location.pathname]);
 
-  // Improved layer selection function
   const selectLayerById = useCallback(
     (id) => {
       const layerToSelect = shapes.find(
@@ -102,19 +101,6 @@ const CanvasEditor = ({ project, fetchProjects }) => {
         });
 
         setSelectedId(layerToSelect.id);
-
-        // Center the view on the selected shape
-        const stage = stageRef.current;
-        if (stage) {
-          const shapeNode = stage.findOne(`#${layerToSelect.id}`);
-          if (shapeNode) {
-            stage.position({
-              x: stage.width() / 2 - shapeNode.x(),
-              y: stage.height() / 2 - shapeNode.y(),
-            });
-            stage.batchDraw();
-          }
-        }
       } else {
         console.warn(`Layer with ID ${id} not found`);
         setSelectedId(null);
@@ -122,6 +108,8 @@ const CanvasEditor = ({ project, fetchProjects }) => {
     },
     [shapes]
   );
+
+
 
   // Update your handleSelect to not trigger URL updates
   const handleSelect = useCallback((id) => {
@@ -143,7 +131,7 @@ const CanvasEditor = ({ project, fetchProjects }) => {
     setSelectedId(id);
   }, []);
 
-  // Handle URL changes -> update state
+
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const layer = query.get("layer");
@@ -158,23 +146,11 @@ const CanvasEditor = ({ project, fetchProjects }) => {
         );
         if (layerToSelect) {
           handleSelect(layerToSelect.id);
-
-          // Center the view on the selected shape
-          const stage = stageRef.current;
-          if (stage) {
-            const shapeNode = stage.findOne(`#${layerToSelect.id}`);
-            if (shapeNode) {
-              stage.position({
-                x: stage.width() / 2 - shapeNode.x(),
-                y: stage.height() / 2 - shapeNode.y(),
-              });
-              stage.batchDraw();
-            }
-          }
         }
       }
     }
-  }, [location.search, shapes.length]); // Only watch these dependencies
+  }, [location.search, shapes.length]);
+
 
   // Handle state changes -> update URL
   useEffect(() => {
@@ -551,7 +527,7 @@ const CanvasEditor = ({ project, fetchProjects }) => {
               const anchorY = anchor.y();
               const distance = Math.sqrt(
                 Math.pow(pointer.x - (shape.x + anchorX), 2) +
-                  Math.pow(pointer.y - (shape.y + anchorY), 2)
+                Math.pow(pointer.y - (shape.y + anchorY), 2)
               );
               return distance < 10;
             });
@@ -961,25 +937,22 @@ const CanvasEditor = ({ project, fetchProjects }) => {
             <hr />
             <div className="tool-buttons">
               <button
-                className={`tool-btn ${
-                  mode === shapeTypes.SELECT ? "active" : ""
-                }`}
+                className={`tool-btn ${mode === shapeTypes.SELECT ? "active" : ""
+                  }`}
                 onClick={() => setMode(shapeTypes.SELECT)}
               >
                 Select
               </button>
               <button
-                className={`tool-btn ${
-                  mode === shapeTypes.BRUSH ? "active" : ""
-                }`}
+                className={`tool-btn ${mode === shapeTypes.BRUSH ? "active" : ""
+                  }`}
                 onClick={() => setMode(shapeTypes.BRUSH)}
               >
                 Brush
               </button>
               <button
-                className={`tool-btn ${
-                  mode === shapeTypes.ERASER ? "active" : ""
-                }`}
+                className={`tool-btn ${mode === shapeTypes.ERASER ? "active" : ""
+                  }`}
                 onClick={() => setMode(shapeTypes.ERASER)}
               >
                 Eraser
@@ -1007,22 +980,22 @@ const CanvasEditor = ({ project, fetchProjects }) => {
                 style={
                   mode === shapeTypes.POLYGON
                     ? {
-                        padding: "8px 12px",
-                        background: "#007bff",
-                        color: "white",
-                        border: "1px solid #007bff",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        whiteSpace: "nowrap",
-                      }
+                      padding: "8px 12px",
+                      background: "#007bff",
+                      color: "white",
+                      border: "1px solid #007bff",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }
                     : {
-                        padding: "8px 12px",
-                        background: "#fff",
-                        border: "1px solid #ccc",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        whiteSpace: "nowrap",
-                      }
+                      padding: "8px 12px",
+                      background: "#fff",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }
                 }
                 onClick={() => {
                   setMode(shapeTypes.POLYGON);
@@ -1035,55 +1008,51 @@ const CanvasEditor = ({ project, fetchProjects }) => {
                 style={
                   mode === shapeTypes.OVAL
                     ? {
-                        padding: "8px 12px",
-                        background: "#007bff",
-                        color: "white",
-                        border: "1px solid #007bff",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        whiteSpace: "nowrap",
-                      }
+                      padding: "8px 12px",
+                      background: "#007bff",
+                      color: "white",
+                      border: "1px solid #007bff",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }
                     : {
-                        padding: "8px 12px",
-                        background: "#fff",
-                        border: "1px solid #ccc",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                        whiteSpace: "nowrap",
-                      }
+                      padding: "8px 12px",
+                      background: "#fff",
+                      border: "1px solid #ccc",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }
                 }
                 onClick={() => setMode(shapeTypes.OVAL)}
               >
                 Oval
               </button>
               <button
-                className={`tool-btn ${
-                  mode === shapeTypes.RECTANGLE ? "active" : ""
-                }`}
+                className={`tool-btn ${mode === shapeTypes.RECTANGLE ? "active" : ""
+                  }`}
                 onClick={() => setMode(shapeTypes.RECTANGLE)}
               >
                 Rectangle
               </button>
               <button
-                className={`tool-btn ${
-                  mode === shapeTypes.CIRCLE ? "active" : ""
-                }`}
+                className={`tool-btn ${mode === shapeTypes.CIRCLE ? "active" : ""
+                  }`}
                 onClick={() => setMode(shapeTypes.CIRCLE)}
               >
                 Circle
               </button>
               <button
-                className={`tool-btn ${
-                  mode === shapeTypes.TRIANGLE ? "active" : ""
-                }`}
+                className={`tool-btn ${mode === shapeTypes.TRIANGLE ? "active" : ""
+                  }`}
                 onClick={() => setMode(shapeTypes.TRIANGLE)}
               >
                 Triangle
               </button>
               <button
-                className={`tool-btn ${
-                  mode === shapeTypes.LINE ? "active" : ""
-                }`}
+                className={`tool-btn ${mode === shapeTypes.LINE ? "active" : ""
+                  }`}
                 onClick={() => setMode(shapeTypes.LINE)}
               >
                 Line
