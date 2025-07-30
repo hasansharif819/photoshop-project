@@ -538,19 +538,13 @@ const ProjectListSidebar = ({ projects, fetchProjects, onProjectUpdate }) => {
       ) {
         const { id } = useParams();
         navigate(`/projects/${id}`);
-        // navigate("/");
       } else {
         const { id } = useParams();
         navigate(`/projects/${id}`);
       }
     } catch (err) {
-      // console.error("Delete failed:", err);
       setDeleteModal({ isOpen: false, type: null, id: null, name: null });
-      if (fetchProjects) {
-        await fetchProjects();
-      }
     } finally {
-      // ✅ Close modal
       setDeleteModal({ isOpen: false, type: null, id: null, name: null });
       if (fetchProjects) {
         await fetchProjects();
@@ -574,6 +568,11 @@ const ProjectListSidebar = ({ projects, fetchProjects, onProjectUpdate }) => {
       project.images.map((image) => ({ ...image, projectId: project.id }))
     )
     .find((image) => image.id === selectedId);
+
+  const handleLayerClick = (layerId, imageId) => {
+    navigate(`/projects/${imageId}?layer=${layerId}`);
+    localStorage.setItem("selectedLayerId", layerId);
+  };
 
   return (
     <div
@@ -878,6 +877,7 @@ const ProjectListSidebar = ({ projects, fetchProjects, onProjectUpdate }) => {
                   marginBottom: "4px",
                   fontSize: "14px",
                 }}
+                onClick={() => handleLayerClick(layer.id, selectedImage.id)}
               >
                 <span
                   style={{
